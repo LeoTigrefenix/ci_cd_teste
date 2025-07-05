@@ -1,0 +1,27 @@
+#
+##
+
+stages:
+  - build
+  - deploy
+
+criar_imagens_job:
+  stage: build
+  # falando a tag da máquina no gitlab -> config -> ci/cd -> executores (runner) -> executores de projeto
+  tags:
+   - clound
+  script:
+  # usar nome de usuário do docker hub / nome : versao depois diretorio que está o dockerfile
+    - docker build -t leonardootigre/gcp-runner:2.2 app/.
+    - docker push leonardootigre/gcp-runner:2.2 # imagem vai subir pro hub
+
+executar_imagens:
+  stage: deploy
+  # só depois que o de cima deu certo né
+  needs:
+   - criar_imagens_job
+  tags:
+   - clound
+  script:
+    ## dar o docker run da imagem na porta que a imagem precisa (no fim o nome da imagem)
+   - docker run -dti --name capivara-landing -p 80:80 leonardootigre/gcp-runner:2.2

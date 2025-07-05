@@ -1,0 +1,42 @@
+
+### Explicação das alterações:
+1. **Imagem base**: Usamos `python:3.9-slim` em vez de `httpd:latest`, pois ela inclui Python e é leve, adequada para aplicações Flask.
+2. **Diretório de trabalho**: Definimos `/app` como diretório de trabalho, que é uma prática comum para aplicações Python.
+3. **Cópia dos arquivos**: Copiamos todos os arquivos do projeto (incluindo `app.py`, `templates/index.html` e `static/styles.css`) para `/app`.
+4. **Instalação do Flask**: O comando `RUN pip install --no-cache-dir flask` instala o Flask sem armazenar o cache do pip, reduzindo o tamanho da imagem.
+5. **Porta 80**: A porta 80 é exposta, conforme você deseja.
+6. **Comando de execução**: O `CMD ["python", "app.py"]` executa o `app.py` quando o contêiner inicia, iniciando o servidor Flask.
+
+### Estrutura do projeto:
+Certifique-se de que a estrutura de pastas está assim:
+```
+capivara_landing/
+├── app.py
+├── Dockerfile
+├── templates/
+│   └── index.html
+├── static/
+│   └── styles.css
+```
+
+### Passos para rodar:
+1. **Construir a imagem Docker**:
+   No diretório do projeto, execute:
+   ```bash
+   docker build -t capivara-landing .
+   ```
+
+2. **Rodar o contêiner**:
+   Execute o contêiner, mapeando a porta 80 do contêiner para a porta 80 do host:
+   ```bash
+   docker run -p 80:80 capivara-landing
+   ```
+   - **Nota**: Rodar na porta 80 pode requerer permissões de administrador no host. Se houver erro de permissão, use outra porta, como 5000, alterando o comando para `docker run -p 5000:80 capivara-landing` e acesse `http://localhost:5000`.
+
+3. **Acessar a aplicação**:
+   Abra o navegador e vá para `http://localhost`. A página sobre capivaras deve carregar.
+
+### Observações:
+- **Permissões para porta 80**: Se você não tiver permissões para rodar na porta 80, pode alterar a porta no `app.py` (ex.: `port=5000`) e no comando `docker run` (ex.: `-p 5000:5000`).
+- **Dependências adicionais**: Se sua aplicação precisar de mais pacotes Python, adicione-os em um arquivo `requirements.txt` e modifique o `Dockerfile` para incluir `RUN pip install --no-cache-dir -r requirements.txt`.
+- **Apache vs. Flask**: Se você realmente quer usar o Apache para servir a aplicação Flask, precisaria configurar um servidor WSGI (como `mod_wsgi`) na imagem `httpd`, mas isso é mais complexo e não recomendado para uma aplicação simples como essa. O Flask já tem um servidor embutido suficiente para sua landing page.
